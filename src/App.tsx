@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -22,22 +16,12 @@ const Navigation: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-left">
-        <Link to="/" className="navbar-link navbar-logo">
-          Shop
-        </Link>
+        <Link to="/" className="navbar-link navbar-logo">Shop</Link>
         {isAuthenticated && (
           <>
-            <Link to="/orders" className="navbar-link">
-              My Orders
-            </Link>
-            <Link to="/profile" className="navbar-link">
-              Profile
-            </Link>
-            {isAdmin && (
-              <Link to="/admin" className="navbar-link">
-                Admin
-              </Link>
-            )}
+            <Link to="/orders" className="navbar-link">My Orders</Link>
+            <Link to="/profile" className="navbar-link">Profile</Link>
+            {isAdmin && <Link to="/admin" className="navbar-link">Admin</Link>}
           </>
         )}
       </div>
@@ -47,18 +31,12 @@ const Navigation: React.FC = () => {
             <span className="navbar-user">
               Welcome, {user?.first_name} ({user?.role})
             </span>
-            <button onClick={() => void logout()} className="btn btn-secondary">
-              Logout
-            </button>
+            <button onClick={logout} className="btn btn-secondary">Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login" className="navbar-link">
-              Login
-            </Link>
-            <Link to="/register" className="navbar-link">
-              Register
-            </Link>
+            <Link to="/login" className="navbar-link">Login</Link>
+            <Link to="/register" className="navbar-link">Register</Link>
           </>
         )}
       </div>
@@ -66,20 +44,10 @@ const Navigation: React.FC = () => {
   );
 };
 
-const ProtectedRoute: React.FC<{
-  children: React.ReactNode;
-  adminOnly?: boolean;
-}> = ({ children, adminOnly }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode; adminOnly?: boolean }> = ({ children, adminOnly }) => {
   const { isAuthenticated, isAdmin } = useAuth();
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (adminOnly && !isAdmin) {
-    return <Navigate to="/" replace />;
-  }
-
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (adminOnly && !isAdmin) return <Navigate to="/" replace />;
   return <>{children}</>;
 };
 
@@ -93,46 +61,12 @@ const App: React.FC = () => {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Items />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/checkout"
-                element={
-                  <ProtectedRoute>
-                    <Checkout />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <Orders />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <Admin />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/" element={<ProtectedRoute><Items /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
         </div>
