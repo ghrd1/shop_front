@@ -30,16 +30,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       usersAPI.getProfile()
         .then((res) => setUser(res.data))
         .catch(() => {
-          localStorage.removeItem("token");
-          setToken(null);
-          setUser(null);
+          handleLocalLogout();
         });
     }
   }, [token]);
 
+  const handleLocalLogout = () => {
+    localStorage.removeItem("token");
+    // Пытаемся затереть куки на клиенте
+    document.cookie.split(";").forEach((c) => {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+    setToken(null);
+    setUser(null);
+  };
+
   const login = async (email: string, password: string) => {
     const response = await authAPI.login(email, password);
-    // Извлекаем токен из заголовка или тела (зависит от настроек твоего API)
     const tokenFromServer = response.data.token || response.headers.authorization;
     
     if (tokenFromServer) {
@@ -66,12 +75,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await authAPI.logout();
     } catch (_error) {
-      console.error("Logout failed on server, clearing local state anyway");
+      console.error("Logout failed on server");
     }
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
-    // Принудительная перезагрузка для очистки всех кэшей
+    handleLocalLogout();
     window.location.href = "/login";
   };
 
